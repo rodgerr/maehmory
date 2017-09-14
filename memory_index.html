@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+   
+      <style>
+         #mycanvas{
+            border:1px solid black;
+
+          }
+      </style>
+        <script type="text/javascript" src="game.js"></script>
+    	<script type="text/javascript">
+			
+            
+            
+            var canvas;
+            var canvas2dContext;
+            
+            
+            var games;
+            var currentGame;
+            
+            //keyboard
+            
+            //mouse
+            var mouse_x, mouse_y;
+            var mouse_down;
+            
+            function init(){
+                
+                this.loadImages();
+                
+                canvas = document.getElementById('mycanvas');               
+                canvas2dContext = canvas.getContext('2d') 
+
+                //mouse events
+                canvas.onmousedown = function(){ 
+                    mouse_down = true; 
+                    games[currentGame].processMousePressed(true,false);
+                }
+                canvas.onmouseup = function(){ 
+                    mouse_down = false;
+                    games[currentGame].processMousePressed(false,false);
+                }
+                
+                canvas.onmousemove = function(e){
+                    mouse_x = e.clientX-canvas.offsetLeft;
+                    mouse_y = e.clientY-canvas.offsetTop;
+                    
+                    
+                    games[currentGame].processMouseInput(mouse_x,mouse_y);                    
+                }
+                
+                //keyboard
+                
+                document.addEventListener('keydown', function(event) {        
+                                       
+                    games[currentGame].processKeyInput(event);
+                    
+                }, false);
+                
+
+                
+                
+                //game initialisation
+                games = [
+                    new MemoryGame()                
+                ];
+                
+                currentGame = 0;
+                
+                //manualy init the first game
+                games[currentGame].init(canvas.width, canvas.height);
+                
+                this.interval = setInterval(gameUpdate, 50);
+                this.interval = setInterval(gameRender, 40);               
+                //draw(10,10);
+                
+                
+            }
+            
+
+            
+            function gameRender(){
+                this.clear();
+                this.games[currentGame].renderCycle(canvas2dContext);
+            }
+            
+            
+            function gameUpdate(){
+                                    
+                
+                
+                if(currentGame >= games.length){
+                    return;
+                }
+                
+                var curGameEntry = games[currentGame];
+                                
+                if(curGameEntry){
+                                    
+                    if(curGameEntry.isFinished()){
+
+                        currentGame++;
+                        if(currentGame > this.games.length){
+                            return;
+                        }
+                        this.games[currentGame].init(this.canvas.width, this.canvas.height);
+                    }
+                    else{
+                        
+                        curGameEntry.update();
+                    }
+                }
+                else{
+                    alert("whoops");
+                }
+                
+                
+            }
+            
+            function draw(x, y){             
+
+                
+				if(canvas.getContext){
+				
+                    var ctx = canvas.getContext('2d');					
+					
+                    ctx.fillStyle = "rgb(200,0,0)";
+                    ctx.fillRect(x, y, 25, 25);
+				}
+			}
+            
+            function clear(){
+                this.canvas2dContext.clearRect(0, 0, 
+                                               this.canvas.width, this.canvas.height);
+            }
+            
+            function loadImages(){               
+                
+                var container = document.getElementById('imagebox');
+                
+                for (var i = 0; i < 9; i++) {
+                    
+                        var card_0_elem = document.createElement("img");
+                        card_0_elem.src = './images/card_p_'+i+'_0.png';
+                        card_0_elem.id = 'img_card_p_'+i+'_0'; 
+                
+                        container.appendChild(card_0_elem);
+                    
+                        var card_1_elem = document.createElement("img");
+                        card_1_elem.src = './images/card_p_'+i+'_1.png';
+                        card_1_elem.id = 'img_card_p_'+i+'_1'; 
+                
+                        container.appendChild(card_1_elem);
+                }
+                
+
+            }
+            
+		</script>
+      
+      
+   </head>
+   <body onload="init();">
+
+      <canvas id="mycanvas" width="1200" height="700">
+      
+      </canvas>
+       <div id="imagebox" style="display:none;" >         
+            <img id="img_card_back" src="./images/card_back.png">
+        </div>
+       
+   </body>
+    
+</html>
