@@ -1,13 +1,8 @@
 <!DOCTYPE HTML>
 <html>
    <head>
-   
-      <style>
-         #mycanvas{
-            border:1px solid black;
-
-          }
-      </style>
+       <link rel="stylesheet" type="text/css" href="style.css">
+       
         <script type="text/javascript" src="game.js"></script>
     	<script type="text/javascript">
 			
@@ -145,13 +140,15 @@
                         var card_0_elem = document.createElement("img");
                         card_0_elem.src = './images/card_p_'+i+'_0.png';
                         card_0_elem.id = 'img_card_p_'+i+'_0'; 
+                        card_0_elem.class = 'card';
                 
                         container.appendChild(card_0_elem);
                     
                         var card_1_elem = document.createElement("img");
                         card_1_elem.src = './images/card_p_'+i+'_1.png';
                         card_1_elem.id = 'img_card_p_'+i+'_1'; 
-                
+                        card_1_elem.class = 'card';    
+                    
                         container.appendChild(card_1_elem);
                 }
                 
@@ -168,7 +165,7 @@
       
       </canvas>
        <div id="imagebox" style="display:none;" >         
-            <img id="img_card_back" src="./images/card_back.png">
+            <img class="card" id="img_card_back" src="./images/card_back.png">
         </div>
        
    </body>

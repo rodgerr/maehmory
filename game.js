@@ -41,7 +41,7 @@ function MemoryGame() {
         this.canvas_height = canvas_height;
         this.gameFinished = false;
         
-        this.topBoardMargin = 50;
+        this.topBoardMargin = 75;
         this.cardMargin = 15;
         
         this.pairs = 9;
@@ -246,20 +246,34 @@ function MemoryGame() {
     
     this.renderCycle = function(context){
         
-        context.fillStyle = "rgb(0,0,0)";  
+
+        context.shadowOffsetX = 4;
+        context.shadowOffsetY = 4;
+        context.shadowBlur    = 7;
+        context.shadowColor = "transparent";
         
-        context.font="30px Verdana";
-        context.fillText(this.activePlayer.name +"'s turn",20,40);        
-        context.font="15px Verdana";
-        context.font="15px Verdana";
+        context.fillStyle = "rgb(255,255,255)";  
         
-        var startPosY = 20; 
-        var startPosX = this.canvas_width-100;
+        //set font
+        context.font="50px Arial Black";
+        context.lineWidth = 2;
+        context.strokeStyle = "rgb(100,100,100)";
+        
+        //display active player
+        context.fillText(this.activePlayer.name +"'s turn",20,50);   
+        context.strokeText(this.activePlayer.name +"'s turn",20,50);   
+        
+        //display points
+        context.font="30px Arial Black";
+        
+        var startPosY = 35; 
+        var startPosX = this.canvas_width-220;
         
         for(var i = 0; i < this.players.length; i++){
             
-            var playr = this.players[i];            
-            context.fillText(playr.points+" - "+playr.name,startPosX,startPosY+(i*15));
+            var playr = this.players[i];  
+            context.fillText(playr.points+" - "+playr.name,startPosX,startPosY+(i*30));
+            context.strokeText(playr.points+" - "+playr.name,startPosX,startPosY+(i*30));
         }
 
         //debug
@@ -284,7 +298,7 @@ function MemoryGame() {
         */
         
 
-        
+        context.shadowColor   = "gray";
         
         
         if(this.isMouseDown){
