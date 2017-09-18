@@ -305,27 +305,23 @@ function MemoryGame() {
         }
         
         
-        context.shadowColor = "transparent";        
+        //context.shadowColor = "transparent";        
         context.fillStyle = "rgb(0,0,0)";  
         
 
         //set font
         context.font="50px beauty_and_the_beastregular";
         context.lineWidth = 2;
-        context.strokeStyle = "rgb(0,0,0)";
+        context.strokeStyle = "rgb(255,255,255)";
         
         //display active player
         context.fillText(this.activePlayer.name +"'s turn",20,70);   
-        //context.strokeText(this.activePlayer.name +"'s turn",20,50);   
+        //context.strokeText(this.activePlayer.name +"'s turn",20,70);   
         
         //display points
         context.font="30px beauty_and_the_beastregular";
         
-                
-        
-        
-        
-        
+ 
        
         
         for(var i = 0; i < this.players.length; i++){
@@ -335,43 +331,42 @@ function MemoryGame() {
             if((i%2) == 0){
                 //gerade
                 
-                var pX = startPosX-190;
-                var pY = startPosY-20;
+                var pX = startPosX;
+                var pY = startPosY;
                 
                 //context.shadowColor   = "gray";
                 //context.drawImage(this.bubble_right,pX, pY, 200, 70);
                 
-                context.shadowColor = "transparent"; 
-                context.fillText(playr.points+" - "+playr.name,pX+10,(pY+(i*30))+42);
+                
+                context.fillText(playr.points+" - "+playr.name,startPosX+40,(pY+(i*30))+20);
             }
             else{
                 //ungerade
                         
                 //context.shadowColor   = "gray";
                 //context.drawImage(this.bubble_left,startPosX, startPosY, 200, 70);
-                
-                 context.shadowColor = "transparent"; 
-                context.fillText(playr.points+" - "+playr.name,startPosX+40,(startPosY+(i*30))+12);
+                context.fillText(playr.points+" - "+playr.name,startPosX+40,(startPosY+(i*30))+30);
             }
         }
         
         
         if(this.promptNextPlayer){
             
-            var horizontalMargin = 100;
-            var verticalMargin = 300;
+            var leftOffset = 460;
+            var topOffset = 280;
             
-            var promptWidth = 400;
-            var promptHeight = this.canvas_height - (verticalMargin*2);
+            var promptWidth = 350;
+            var promptHeight = 100;
             
             context.fillStyle = "rgb(255,255,255)";
-            context.fillRect(horizontalMargin, verticalMargin, promptWidth, promptHeight);
+            //context.fillRect(horizontalMargin, verticalMargin, promptWidth, promptHeight);
             
+            context.drawImage(this.bubble_right, leftOffset, topOffset, promptWidth, promptHeight);
+            
+            context.shadowColor   = "transparent";
             context.fillStyle = "rgb(0,0,0)";
-            context.font="30px Verdana";
-            context.fillText("next player",
-                             horizontalMargin+(promptWidth/3),
-                             verticalMargin+(promptHeight/2));
+            context.font="50px beauty_and_the_beastregular";
+            context.fillText("next player",leftOffset+20,topOffset+60);
         }
         
     }
@@ -428,7 +423,10 @@ function MemoryCard (index, partIndex) {
         
         if(!this.opened){
             context.fillStyle = this.calcRGB(175,175,175);
-            context.fillRect(this.x, this.y, this.width, this.height);
+            
+            roundRect(context,this.x, this.y, this.width, this.height,15,true,false);
+            
+            //context.fillRect(this.x, this.y, this.width, this.height);
             context.drawImage(this.cardBack,this.x, this.y);
         }
         else{
@@ -437,7 +435,7 @@ function MemoryCard (index, partIndex) {
             }
             else{
                 context.fillStyle = this.calcRGB(this.r,this.g,this.b);
-                context.fillRect(this.x, this.y, this.width, this.height);
+                roundRect(context,this.x, this.y, this.width, this.height,15,true,false);
             }
         }
     }
@@ -457,5 +455,58 @@ function MemoryPlayer (playerName) {
     this.receivePoint = function () {
         this.points++;
     }
+
+}
+
+/**
+ * Draws a rounded rectangle using the current state of the canvas.
+ * If you omit the last three params, it will draw a rectangle
+ * outline with a 5 pixel border radius
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate
+ * @param {Number} width The width of the rectangle
+ * @param {Number} height The height of the rectangle
+ * @param {Number} [radius = 5] The corner radius; It can also be an object 
+ *                 to specify different radii for corners
+ * @param {Number} [radius.tl = 0] Top left
+ * @param {Number} [radius.tr = 0] Top right
+ * @param {Number} [radius.br = 0] Bottom right
+ * @param {Number} [radius.bl = 0] Bottom left
+ * @param {Boolean} [fill = false] Whether to fill the rectangle.
+ * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+ */
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == 'undefined') {
+    stroke = true;
+  }
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.stroke();
+  }
 
 }
