@@ -4,8 +4,18 @@
 
 body{
     background-color: #fff;
+    font-family: 'beauty_and_the_beastregular';
 }
 
 .card {
     background-color: yellow;
+}
+
+@font-face {
+    font-family: 'beauty_and_the_beastregular';
+    src: url('beauty_and_the_beast_sample-webfont.woff2') format('woff2'),
+         url('beauty_and_the_beast_sample-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
 }

@@ -32,6 +32,8 @@ function MemoryGame() {
     var cardMargin;
     var cardWidth, cardHeight;
     
+    var bubble_left, bubble_right;
+    
     this.init = function(canvas_width,canvas_height){ 
         
         console.log("canvas size is "+canvas_width+"x"+canvas_height);
@@ -41,7 +43,7 @@ function MemoryGame() {
         this.canvas_height = canvas_height;
         this.gameFinished = false;
         
-        this.topBoardMargin = 75;
+        this.topBoardMargin = 105;
         this.cardMargin = 15;
         
         this.pairs = 9;
@@ -51,6 +53,9 @@ function MemoryGame() {
         
         this.cardWidth = 180;
         this.cardHeight = 180;
+        
+        this.bubble_left = document.getElementById('img_bubble_left');
+        this.bubble_right = document.getElementById('img_bubble_right');
         
         //generate cards
         this.cards = new Array(this.pairs*2);
@@ -246,35 +251,12 @@ function MemoryGame() {
     
     this.renderCycle = function(context){
         
-
+            
+        
         context.shadowOffsetX = 4;
         context.shadowOffsetY = 4;
         context.shadowBlur    = 7;
-        context.shadowColor = "transparent";
-        
-        context.fillStyle = "rgb(255,255,255)";  
-        
-        //set font
-        context.font="50px Arial Black";
-        context.lineWidth = 2;
-        context.strokeStyle = "rgb(100,100,100)";
-        
-        //display active player
-        context.fillText(this.activePlayer.name +"'s turn",20,50);   
-        context.strokeText(this.activePlayer.name +"'s turn",20,50);   
-        
-        //display points
-        context.font="30px Arial Black";
-        
-        var startPosY = 35; 
-        var startPosX = this.canvas_width-220;
-        
-        for(var i = 0; i < this.players.length; i++){
-            
-            var playr = this.players[i];  
-            context.fillText(playr.points+" - "+playr.name,startPosX,startPosY+(i*30));
-            context.strokeText(playr.points+" - "+playr.name,startPosX,startPosY+(i*30));
-        }
+
 
         //debug
         /*
@@ -296,9 +278,16 @@ function MemoryGame() {
         context.fillText("player switch confirmed "+this.playerSwitchConfirmed,100,25);
         
         */
+        //left space
+        var startPosY = 30; 
+        var startPosX = this.canvas_width-230;
         
 
         context.shadowColor   = "gray";
+        
+        //display player bubble
+        //context.drawImage(this.bubble_right,10, 10, 400, 95);
+
         
         
         if(this.isMouseDown){
@@ -314,6 +303,58 @@ function MemoryGame() {
                 cur_card.drawCard(context);
             }
         }
+        
+        
+        context.shadowColor = "transparent";        
+        context.fillStyle = "rgb(0,0,0)";  
+        
+
+        //set font
+        context.font="50px beauty_and_the_beastregular";
+        context.lineWidth = 2;
+        context.strokeStyle = "rgb(0,0,0)";
+        
+        //display active player
+        context.fillText(this.activePlayer.name +"'s turn",20,70);   
+        //context.strokeText(this.activePlayer.name +"'s turn",20,50);   
+        
+        //display points
+        context.font="30px beauty_and_the_beastregular";
+        
+                
+        
+        
+        
+        
+       
+        
+        for(var i = 0; i < this.players.length; i++){
+            
+            var playr = this.players[i];
+            
+            if((i%2) == 0){
+                //gerade
+                
+                var pX = startPosX-190;
+                var pY = startPosY-20;
+                
+                //context.shadowColor   = "gray";
+                //context.drawImage(this.bubble_right,pX, pY, 200, 70);
+                
+                context.shadowColor = "transparent"; 
+                context.fillText(playr.points+" - "+playr.name,pX+10,(pY+(i*30))+42);
+            }
+            else{
+                //ungerade
+                        
+                //context.shadowColor   = "gray";
+                //context.drawImage(this.bubble_left,startPosX, startPosY, 200, 70);
+                
+                 context.shadowColor = "transparent"; 
+                context.fillText(playr.points+" - "+playr.name,startPosX+40,(startPosY+(i*30))+12);
+            }
+        }
+        
         
         if(this.promptNextPlayer){
             
