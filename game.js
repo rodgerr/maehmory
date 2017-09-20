@@ -4,7 +4,6 @@ function MemoryGame() {
     var isMouseDown;
     var mouse_x, mouse_y;
     var canvas_width,canvas_height;
-    var gameFinished;
     
     //game objects
     var cards; // array - contains the card definition, id, image etc
@@ -21,11 +20,14 @@ function MemoryGame() {
     var activePlayerIndex;
     var players;
     
+    var winner;
+    
     var selectedCard1;
     var selectedCard2;
     
     var promptNextPlayer;  
     var playerSwitchConfirmed;
+    var showWinner;
     
     //visuals
     var topBoardMargin;
@@ -41,7 +43,7 @@ function MemoryGame() {
         this.isMouseDown = false;
         this.canvas_width = canvas_width;
         this.canvas_height = canvas_height;
-        this.gameFinished = false;
+        this.winner = null;
         
         this.topBoardMargin = 105;
         this.cardMargin = 15;
@@ -168,10 +170,10 @@ function MemoryGame() {
     
     this.processMousePressed = function(primary_down,secondary_down){
         this.isMouseDown = primary_down;        
-  
+        
         if(primary_down){
             
-            if(!this.promptNextPlayer ){
+            if(!this.promptNextPlayer){
                 
                 for(var i = 0; i < this.horizontal_card_count; i++){                  
                     for(var j = 0; j < this.vertical_card_count; j++){
@@ -179,22 +181,23 @@ function MemoryGame() {
                         var cur_card = this.cards[this.board[i][j]];
                         var clicked = cur_card.containsPoint(mouse_x,mouse_y);
                         if(clicked){
+                            
+                            if(!cur_card.opened){
+                                                   
+                                cur_card.open();
 
-                           
-                            cur_card.opened = true;
+                                if(this.selectedCard1 == null){
+                                    this.selectedCard1 = cur_card;
+                                }
+                                else {
+                                    this.selectedCard2 = cur_card;
+                                }
 
-                            if(this.selectedCard1 == null){
-                                this.selectedCard1 = cur_card;
+                                break;
                             }
-                            else {
-                                this.selectedCard2 = cur_card;
-                            }
-
-                            break;
                         }
                     }
                 }//outer for
-                
             } //if promptplayer active 
             else{
                 this.playerSwitchConfirmed = true;
@@ -220,6 +223,10 @@ function MemoryGame() {
            if(this.selectedCard1.index == this.selectedCard2.partnerIndex){
                this.activePlayer.receivePoint();
                
+               if(this.gameFinished()){
+                   this.endGame();
+               }
+               
                this.selectedCard1 = null;
                this.selectedCard2 = null;
            }
@@ -240,8 +247,11 @@ function MemoryGame() {
                    
                }
                else if (!this.promptNextPlayer ){
-                   this.promptNextPlayer = true;  
-                   this.playerSwitchConfirmed = false;
+                   
+                   if(!this.selectedCard1.open_transition && !this.selectedCard2.open_transition){
+                       this.promptNextPlayer = true;  
+                       this.playerSwitchConfirmed = false;
+                   }
                }
                            
            }
@@ -258,26 +268,8 @@ function MemoryGame() {
         context.shadowBlur    = 7;
 
 
-        //debug
-        /*
-        if(this.selectedCard1 != null){
-            context.fillText(this.selectedCard1.index+" - "+this.selectedCard1.partnerIndex,5,10);  
-        }
-        else{
-            context.fillText("card 1 null",5,10);
-        }   
         
-        if(this.selectedCard2 != null){
-            context.fillText(this.selectedCard2.index+" - "+this.selectedCard2.partnerIndex,5,25);
-        }
-        else{
-            context.fillText("card 2 null",5,25);
-        }
-        
-        context.fillText("prompt next player "+this.promptNextPlayer,100,10);
-        context.fillText("player switch confirmed "+this.playerSwitchConfirmed,100,25);
-        
-        */
+       
         //left space
         var startPosY = 30; 
         var startPosX = this.canvas_width-230;
@@ -350,33 +342,54 @@ function MemoryGame() {
         }
         
         
-        if(this.promptNextPlayer){
+        if(this.promptNextPlayer){            
+            
             
             var leftOffset = 460;
             var topOffset = 280;
             
             var promptWidth = 350;
             var promptHeight = 100;
+                        
+            this.drawPopUP(context,leftOffset,topOffset,promptWidth,promptHeight,"next player");
+        }
+        
+        if(this.showWinner){
+            var leftOffset = 440;
+            var topOffset = 280;
             
-            context.fillStyle = "rgb(255,255,255)";
-            //context.fillRect(horizontalMargin, verticalMargin, promptWidth, promptHeight);
-            
-            context.drawImage(this.bubble_right, leftOffset, topOffset, promptWidth, promptHeight);
-            
-            context.shadowColor   = "transparent";
-            context.fillStyle = "rgb(0,0,0)";
-            context.font="50px beauty_and_the_beastregular";
-            context.fillText("next player",leftOffset+20,topOffset+60);
+            var promptWidth = 400;
+            var promptHeight = 100;
+                        
+            this.drawPopUP(context,
+                           leftOffset,
+                           topOffset,
+                           promptWidth,
+                           promptHeight, 
+                           this.winner.name+" wins!");
         }
         
     }
     
-    this.killscreen = function(){
-        console.log("Memory killscreen")
+    this.drawPopUP = function(context,x, y, width, height, text){
+            
+
+            
+            context.fillStyle = "rgb(255,255,255)";
+            //context.fillRect(horizontalMargin, verticalMargin, promptWidth, promptHeight);
+            
+            context.drawImage(this.bubble_right, x, y, width, height);
+            
+            context.shadowColor   = "transparent";
+            context.fillStyle = "rgb(0,0,0)";
+            context.font="50px beauty_and_the_beastregular";
+            context.fillText(text,x+20,y+60);
+        
     }
     
+    
     this.isFinished = function(){
-        return this.gameFinished;        
+        return false;        
     }
     
     this.shuffle = function(a) {
@@ -396,6 +409,38 @@ function MemoryGame() {
         this.activePlayer = this.players[this.activePlayerIndex];
     }
     
+    
+    this.gameFinished = function(){
+        
+        for(var i = 0; i < this.horizontal_card_count; i++){                  
+            for(var j = 0; j < this.vertical_card_count; j++){
+
+                var cur_card = this.cards[this.board[i][j]];
+                if(!cur_card.opened){
+                    return false;   
+                }
+            }
+        }//outer for
+        return true;
+    }
+    
+    this.endGame = function(){
+        
+        var tmp = this.players[0];
+        
+        for(var i = 1; i < this.players.length; i++){
+            
+            var playr = this.players[i];
+            if(playr.points > tmp.points){
+                tmp = playr;
+            }
+        }
+        
+        this.winner = tmp;
+        this.showWinner = true;
+    }
+    
+    
 }//class
 
 function MemoryCard (index, partIndex) {
@@ -407,12 +452,18 @@ function MemoryCard (index, partIndex) {
     this.r = 0;
     this.g = 0;
     this.b = 0;
+    this.anim_speed = 30;
+    
     this.opened = false;
     this.cardBack = document.getElementById('img_card_back');
     this.imageID = null;
     
     this.index = index;
     this.partnerIndex = partIndex;
+    this.open_transition;
+    
+    this.renderWidth = 0;
+    this.renderHeight = 0;
     
     this.containsPoint = function (x, y) {
         return this.x <= x && x <= this.x + this.width &&
@@ -421,23 +472,48 @@ function MemoryCard (index, partIndex) {
 
     this.drawCard = function (context) {
         
-        if(!this.opened){
+
+        
+        if(this.open_transition){
+            
+            //this.renderHeight = this.renderHeight - 10;
+            this.renderWidth = this.renderWidth - this.anim_speed;
+            if(this.renderWidth < 1){
+                this.renderWidth = 0;
+                this.open_transition = false;
+                
+            }
+        }
+        else{
+            this.renderHeight = this.height;
+            this.renderWidth = this.width;
+        }
+        
+        var cWidth = this.renderWidth;
+        var cHeight = this.renderHeight;
+        
+        if(!this.opened || this.open_transition){
             context.fillStyle = this.calcRGB(175,175,175);
             
-            roundRect(context,this.x, this.y, this.width, this.height,15,true,false);
+            roundRect(context,this.x, this.y, cWidth,cHeight,15,true,false);
             
             //context.fillRect(this.x, this.y, this.width, this.height);
-            context.drawImage(this.cardBack,this.x, this.y);
+            context.drawImage(this.cardBack,this.x, this.y,cWidth,cHeight);
         }
         else{
             if(this.imageID != null){
-                 context.drawImage(this.imageID, this.x, this.y);
+                 context.drawImage(this.imageID, this.x, this.y,cWidth,cHeight);
             }
             else{
                 context.fillStyle = this.calcRGB(this.r,this.g,this.b);
                 roundRect(context,this.x, this.y, this.width, this.height,15,true,false);
             }
         }
+    }
+    
+    this.open = function(){        
+        this.opened = true;
+        this.open_transition = true;
     }
     
     this.calcRGB = function(r, g, b){

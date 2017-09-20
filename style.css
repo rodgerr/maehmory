@@ -19,3 +19,9 @@ body{
     font-style: normal;
 
 }
+
+#card_container{
+    background-image: url("./images/background.png");
+    width: 1200px;
+    height: 720px;
+}
